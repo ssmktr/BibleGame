@@ -6,19 +6,20 @@ export interface RankingEntry {
 
 const MAX_RANKINGS = 30;
 
-// Returns the timestamp (ms) of the start of the current hour
-function currentHourStart(): number {
-  return Math.floor(Date.now() / 3_600_000) * 3_600_000;
+// Returns the timestamp (ms) of today's midnight in local time
+function currentDayStart(): number {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 }
 
-// Clears rankings for a key if the hour has turned since last write
+// Clears rankings for a key if midnight has passed since last write
 function purgeIfStale(key: string): void {
-  const hourKey = `ranking:${key}:hour`;
-  const stored = localStorage.getItem(hourKey);
-  const current = currentHourStart();
+  const dayKey = `ranking:${key}:day`;
+  const stored = localStorage.getItem(dayKey);
+  const current = currentDayStart();
   if (stored === null || Number(stored) < current) {
     localStorage.removeItem(`ranking:${key}`);
-    localStorage.setItem(hourKey, String(current));
+    localStorage.setItem(dayKey, String(current));
   }
 }
 
