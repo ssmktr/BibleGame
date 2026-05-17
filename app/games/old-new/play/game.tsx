@@ -15,7 +15,7 @@ import {
   rectSortingStrategy,
   arraySwap,
 } from "@dnd-kit/sortable";
-import { BIBLE_BOOKS } from "@/data/bibleBooks";
+import { OLD_TESTAMENT_BOOKS, NEW_TESTAMENT_BOOKS } from "@/data/bibleBooks";
 import { addRanking } from "@/lib/ranking";
 import { useTimer } from "@/lib/useTimer";
 import { BookCard } from "@/components/BookCard";
@@ -44,12 +44,19 @@ function shuffleCards(arr: CardItem[]): CardItem[] {
   return result;
 }
 
-export default function OldNewPlayGame() {
+const LABEL: Record<"old" | "new", string> = {
+  old: "구약",
+  new: "신약",
+};
+
+export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   const router = useRouter();
+  const books = type === "new" ? NEW_TESTAMENT_BOOKS : OLD_TESTAMENT_BOOKS;
+  const rankingKey = `old-new:${type}`;
 
   // Eagerly initialized — safe because this component is never SSR'd (ssr: false in parent)
   const [cards, setCards] = useState<CardItem[]>(() => {
-    const initial = BIBLE_BOOKS.map((book, i) => ({
+    const initial = books.map((book, i) => ({
       id: book.id,
       name: book.name,
       abbr: book.abbr,
@@ -58,7 +65,7 @@ export default function OldNewPlayGame() {
     return shuffleCards(initial);
   });
   const [cardStates, setCardStates] = useState<CardStatus[]>(() =>
-    Array(BIBLE_BOOKS.length).fill("neutral") as CardStatus[]
+    Array(books.length).fill("neutral") as CardStatus[]
   );
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showNicknameDialog, setShowNicknameDialog] = useState(false);
@@ -101,8 +108,8 @@ export default function OldNewPlayGame() {
   }
 
   function handleNicknameSubmit(nickname: string) {
-    addRanking("old-new", { nickname, timeMs: finalTimeMs });
-    router.push(`/games/old-new/ranking?time=${finalTimeMs}`);
+    addRanking(rankingKey, { nickname, timeMs: finalTimeMs });
+    router.push(`/games/old-new/ranking?type=${type}&time=${finalTimeMs}`);
   }
 
   function handleExit() {
@@ -118,7 +125,7 @@ export default function OldNewPlayGame() {
   return (
     <main className="min-h-screen bg-linear-to-br from-emerald-50 to-teal-100 flex flex-col">
       <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-sm border-b border-white/50 shadow-sm">
-        <h2 className="font-bold text-teal-800">구약/신약 순서 맞추기</h2>
+        <h2 className="font-bold text-teal-800">{LABEL[type]} 순서 맞추기</h2>
         <div className="flex items-center gap-3">
           <span className="font-mono font-bold text-lg text-teal-700">{timeDisplay}</span>
           <button

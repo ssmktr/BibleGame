@@ -19,16 +19,22 @@ export default function OldNewEntryPage() {
           </div>
           <div>
             <h1 className="text-3xl font-black text-teal-900">구약 / 신약</h1>
-            <p className="text-teal-600 font-medium mt-1">순서 맞추기 (66권)</p>
+            <p className="text-teal-600 font-medium mt-1">순서 맞추기</p>
           </div>
         </div>
 
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Link
-            href="/games/old-new/play"
+            href="/games/old-new/play?type=old"
             className="py-4 bg-teal-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-teal-700 active:scale-95 transition-all shadow-md"
           >
-            게임 시작
+            구약 시작 (39권)
+          </Link>
+          <Link
+            href="/games/old-new/play?type=new"
+            className="py-4 bg-emerald-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-emerald-700 active:scale-95 transition-all shadow-md"
+          >
+            신약 시작 (27권)
           </Link>
           <Link
             href="/games/old-new/ranking"

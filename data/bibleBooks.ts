@@ -74,3 +74,6 @@ export const BIBLE_BOOKS: BibleBook[] = [
   { id: "jud",  name: "유다서",       abbr: "유"  },
   { id: "rev",  name: "요한계시록",   abbr: "계"  },
 ];
+
+export const OLD_TESTAMENT_BOOKS = BIBLE_BOOKS.slice(0, 39);
+export const NEW_TESTAMENT_BOOKS = BIBLE_BOOKS.slice(39);

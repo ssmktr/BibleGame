@@ -5,16 +5,25 @@ import Link from "next/link";
 import { getRankings, type RankingEntry } from "@/lib/ranking";
 import { RankingTable } from "@/components/RankingTable";
 
+type TabType = "old" | "new";
+
 function RankingContent() {
   const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type") as TabType | null;
   const timeParam = searchParams.get("time");
   const highlightTime = timeParam ? Number(timeParam) : undefined;
 
-  const [rankings, setRankings] = useState<RankingEntry[]>([]);
+  const [activeTab, setActiveTab] = useState<TabType>(typeParam === "new" ? "new" : "old");
+  const [oldRankings, setOldRankings] = useState<RankingEntry[]>([]);
+  const [newRankings, setNewRankings] = useState<RankingEntry[]>([]);
 
   useEffect(() => {
-    setRankings(getRankings("old-new"));
+    setOldRankings(getRankings("old-new:old"));
+    setNewRankings(getRankings("old-new:new"));
   }, []);
+
+  const currentRankings = activeTab === "old" ? oldRankings : newRankings;
+  const currentHighlight = typeParam === activeTab ? highlightTime : undefined;
 
   return (
     <main className="min-h-screen bg-linear-to-br from-emerald-50 to-teal-100 flex flex-col">
@@ -29,8 +38,31 @@ function RankingContent() {
       </header>
 
       <div className="flex-1 max-w-2xl mx-auto w-full p-4 flex flex-col gap-4">
+        <div className="flex rounded-xl overflow-hidden border-2 border-teal-200">
+          <button
+            onClick={() => setActiveTab("old")}
+            className={`flex-1 py-3 font-bold text-sm transition-colors ${
+              activeTab === "old"
+                ? "bg-teal-600 text-white"
+                : "bg-white text-teal-700 hover:bg-teal-50"
+            }`}
+          >
+            구약 (39권)
+          </button>
+          <button
+            onClick={() => setActiveTab("new")}
+            className={`flex-1 py-3 font-bold text-sm transition-colors ${
+              activeTab === "new"
+                ? "bg-teal-600 text-white"
+                : "bg-white text-teal-700 hover:bg-teal-50"
+            }`}
+          >
+            신약 (27권)
+          </button>
+        </div>
+
         <div className="bg-white/70 rounded-2xl p-4 shadow-sm">
-          <RankingTable rankings={rankings} highlightTime={highlightTime} />
+          <RankingTable rankings={currentRankings} highlightTime={currentHighlight} />
         </div>
 
         <Link
