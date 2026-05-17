@@ -1,8 +1,11 @@
 "use client";
-import { Component, type ReactNode } from "react";
+import { Component, createContext, useContext, type ReactNode } from "react";
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ConvexRankingProvider } from "./ConvexRankingProvider";
 import { RankingContext } from "@/lib/rankingContext";
+
+const ConvexAvailableContext = createContext(false);
+export const useConvexAvailable = () => useContext(ConvexAvailableContext);
 
 const noopRanking = async () => null;
 
@@ -41,7 +44,9 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   return (
     <ConvexErrorBoundary fallback={<NoConvexTree>{children}</NoConvexTree>}>
       <ConvexProvider client={convex}>
-        <ConvexRankingProvider>{children}</ConvexRankingProvider>
+        <ConvexAvailableContext.Provider value={true}>
+          <ConvexRankingProvider>{children}</ConvexRankingProvider>
+        </ConvexAvailableContext.Provider>
       </ConvexProvider>
     </ConvexErrorBoundary>
   );

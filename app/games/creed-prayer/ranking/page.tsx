@@ -6,18 +6,19 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RankingTable } from "@/components/RankingTable";
 import { GAME_LABELS, type GameType } from "@/data/creedPrayer";
+import { useConvexAvailable } from "@/components/ConvexClientProvider";
+import type { RankingEntry } from "@/lib/ranking";
 
-function RankingContent() {
-  const searchParams = useSearchParams();
-  const typeParam = (searchParams.get("type") ?? "creed") as GameType;
-  const timeParam = searchParams.get("time");
-  const highlightTime = timeParam ? Number(timeParam) : undefined;
+interface RankingUIProps {
+  activeTab: GameType;
+  setActiveTab: (tab: GameType) => void;
+  creedRankings: RankingEntry[];
+  prayerRankings: RankingEntry[];
+  typeParam: GameType;
+  highlightTime: number | undefined;
+}
 
-  const [activeTab, setActiveTab] = useState<GameType>(typeParam);
-
-  const creedRankings = useQuery(api.rankings.list, { gameKey: "creed-prayer:creed" }) ?? [];
-  const prayerRankings = useQuery(api.rankings.list, { gameKey: "creed-prayer:prayer" }) ?? [];
-
+function RankingUI({ activeTab, setActiveTab, creedRankings, prayerRankings, typeParam, highlightTime }: RankingUIProps) {
   const currentRankings = activeTab === "creed" ? creedRankings : prayerRankings;
   const currentHighlight = activeTab === typeParam ? highlightTime : undefined;
 
@@ -62,6 +63,52 @@ function RankingContent() {
         </Link>
       </div>
     </main>
+  );
+}
+
+function ConvexRankingContent({ activeTab, setActiveTab, typeParam, highlightTime }: Omit<RankingUIProps, "creedRankings" | "prayerRankings">) {
+  const creedRankings = (useQuery(api.rankings.list, { gameKey: "creed-prayer:creed" }) ?? []) as RankingEntry[];
+  const prayerRankings = (useQuery(api.rankings.list, { gameKey: "creed-prayer:prayer" }) ?? []) as RankingEntry[];
+  return (
+    <RankingUI
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      creedRankings={creedRankings}
+      prayerRankings={prayerRankings}
+      typeParam={typeParam}
+      highlightTime={highlightTime}
+    />
+  );
+}
+
+function RankingContent() {
+  const searchParams = useSearchParams();
+  const typeParam = (searchParams.get("type") ?? "creed") as GameType;
+  const timeParam = searchParams.get("time");
+  const highlightTime = timeParam ? Number(timeParam) : undefined;
+  const [activeTab, setActiveTab] = useState<GameType>(typeParam);
+  const convexAvailable = useConvexAvailable();
+
+  if (!convexAvailable) {
+    return (
+      <RankingUI
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        creedRankings={[]}
+        prayerRankings={[]}
+        typeParam={typeParam}
+        highlightTime={highlightTime}
+      />
+    );
+  }
+
+  return (
+    <ConvexRankingContent
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      typeParam={typeParam}
+      highlightTime={highlightTime}
+    />
   );
 }
 

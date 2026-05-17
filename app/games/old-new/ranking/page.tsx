@@ -5,20 +5,21 @@ import Link from "next/link";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { RankingTable } from "@/components/RankingTable";
+import { useConvexAvailable } from "@/components/ConvexClientProvider";
+import type { RankingEntry } from "@/lib/ranking";
 
 type TabType = "old" | "new";
 
-function RankingContent() {
-  const searchParams = useSearchParams();
-  const typeParam = searchParams.get("type") as TabType | null;
-  const timeParam = searchParams.get("time");
-  const highlightTime = timeParam ? Number(timeParam) : undefined;
+interface RankingUIProps {
+  activeTab: TabType;
+  setActiveTab: (tab: TabType) => void;
+  oldRankings: RankingEntry[];
+  newRankings: RankingEntry[];
+  typeParam: TabType;
+  highlightTime: number | undefined;
+}
 
-  const [activeTab, setActiveTab] = useState<TabType>(typeParam === "new" ? "new" : "old");
-
-  const oldRankings = useQuery(api.rankings.list, { gameKey: "old-new:old" }) ?? [];
-  const newRankings = useQuery(api.rankings.list, { gameKey: "old-new:new" }) ?? [];
-
+function RankingUI({ activeTab, setActiveTab, oldRankings, newRankings, typeParam, highlightTime }: RankingUIProps) {
   const currentRankings = activeTab === "old" ? oldRankings : newRankings;
   const currentHighlight = typeParam === activeTab ? highlightTime : undefined;
 
@@ -70,6 +71,52 @@ function RankingContent() {
         </Link>
       </div>
     </main>
+  );
+}
+
+function ConvexRankingContent({ activeTab, setActiveTab, typeParam, highlightTime }: Omit<RankingUIProps, "oldRankings" | "newRankings">) {
+  const oldRankings = (useQuery(api.rankings.list, { gameKey: "old-new:old" }) ?? []) as RankingEntry[];
+  const newRankings = (useQuery(api.rankings.list, { gameKey: "old-new:new" }) ?? []) as RankingEntry[];
+  return (
+    <RankingUI
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      oldRankings={oldRankings}
+      newRankings={newRankings}
+      typeParam={typeParam}
+      highlightTime={highlightTime}
+    />
+  );
+}
+
+function RankingContent() {
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type") as TabType | null;
+  const timeParam = searchParams.get("time");
+  const highlightTime = timeParam ? Number(timeParam) : undefined;
+  const [activeTab, setActiveTab] = useState<TabType>(typeParam === "new" ? "new" : "old");
+  const convexAvailable = useConvexAvailable();
+
+  if (!convexAvailable) {
+    return (
+      <RankingUI
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        oldRankings={[]}
+        newRankings={[]}
+        typeParam={typeParam === "new" ? "new" : "old"}
+        highlightTime={highlightTime}
+      />
+    );
+  }
+
+  return (
+    <ConvexRankingContent
+      activeTab={activeTab}
+      setActiveTab={setActiveTab}
+      typeParam={typeParam === "new" ? "new" : "old"}
+      highlightTime={highlightTime}
+    />
   );
 }
 
