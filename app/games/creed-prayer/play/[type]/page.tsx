@@ -9,7 +9,7 @@ const CreedPrayerPlayGame = dynamic(() => import("./game"), {
     <main className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex flex-col">
       <div className="flex-1 p-4 max-w-2xl mx-auto w-full">
         <div className="flex flex-col gap-2">
-          {Array.from({ length: 9 }, (_, i) => (
+          {Array.from({ length: 10 }, (_, i) => (
             <div key={i} className="h-14 rounded-xl border-2 border-gray-200 bg-white animate-pulse" />
           ))}
         </div>
