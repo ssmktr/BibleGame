@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Component, Suspense, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "convex/react";
@@ -9,6 +9,17 @@ import { useConvexAvailable } from "@/components/ConvexClientProvider";
 import type { RankingEntry } from "@/lib/ranking";
 
 type TabType = "old" | "new";
+
+class QueryErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
 
 interface RankingUIProps {
   activeTab: TabType;
@@ -27,10 +38,7 @@ function RankingUI({ activeTab, setActiveTab, oldRankings, newRankings, typePara
     <main className="min-h-screen bg-linear-to-br from-emerald-50 to-teal-100 flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-white/50">
         <h1 className="font-black text-teal-900 text-xl">🏆 랭킹</h1>
-        <Link
-          href="/select"
-          className="text-sm text-teal-600 font-semibold hover:text-teal-800 transition-colors"
-        >
+        <Link href="/select" className="text-sm text-teal-600 font-semibold hover:text-teal-800 transition-colors">
           게임 선택 →
         </Link>
       </header>
@@ -40,9 +48,7 @@ function RankingUI({ activeTab, setActiveTab, oldRankings, newRankings, typePara
           <button
             onClick={() => setActiveTab("old")}
             className={`flex-1 py-3 font-bold text-sm transition-colors ${
-              activeTab === "old"
-                ? "bg-teal-600 text-white"
-                : "bg-white text-teal-700 hover:bg-teal-50"
+              activeTab === "old" ? "bg-teal-600 text-white" : "bg-white text-teal-700 hover:bg-teal-50"
             }`}
           >
             구약 (39권)
@@ -50,9 +56,7 @@ function RankingUI({ activeTab, setActiveTab, oldRankings, newRankings, typePara
           <button
             onClick={() => setActiveTab("new")}
             className={`flex-1 py-3 font-bold text-sm transition-colors ${
-              activeTab === "new"
-                ? "bg-teal-600 text-white"
-                : "bg-white text-teal-700 hover:bg-teal-50"
+              activeTab === "new" ? "bg-teal-600 text-white" : "bg-white text-teal-700 hover:bg-teal-50"
             }`}
           >
             신약 (27권)
@@ -74,49 +78,28 @@ function RankingUI({ activeTab, setActiveTab, oldRankings, newRankings, typePara
   );
 }
 
-function ConvexRankingContent({ activeTab, setActiveTab, typeParam, highlightTime }: Omit<RankingUIProps, "oldRankings" | "newRankings">) {
+function ConvexRankingContent(props: Omit<RankingUIProps, "oldRankings" | "newRankings">) {
   const oldRankings = (useQuery(api.rankings.list, { gameKey: "old-new:old" }) ?? []) as RankingEntry[];
   const newRankings = (useQuery(api.rankings.list, { gameKey: "old-new:new" }) ?? []) as RankingEntry[];
-  return (
-    <RankingUI
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      oldRankings={oldRankings}
-      newRankings={newRankings}
-      typeParam={typeParam}
-      highlightTime={highlightTime}
-    />
-  );
+  return <RankingUI {...props} oldRankings={oldRankings} newRankings={newRankings} />;
 }
 
 function RankingContent() {
   const searchParams = useSearchParams();
-  const typeParam = searchParams.get("type") as TabType | null;
-  const timeParam = searchParams.get("time");
-  const highlightTime = timeParam ? Number(timeParam) : undefined;
-  const [activeTab, setActiveTab] = useState<TabType>(typeParam === "new" ? "new" : "old");
+  const typeParam = (searchParams.get("type") === "new" ? "new" : "old") as TabType;
+  const highlightTime = searchParams.get("time") ? Number(searchParams.get("time")) : undefined;
+  const [activeTab, setActiveTab] = useState<TabType>(typeParam);
   const convexAvailable = useConvexAvailable();
 
-  if (!convexAvailable) {
-    return (
-      <RankingUI
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        oldRankings={[]}
-        newRankings={[]}
-        typeParam={typeParam === "new" ? "new" : "old"}
-        highlightTime={highlightTime}
-      />
-    );
-  }
+  const uiProps = { activeTab, setActiveTab, typeParam, highlightTime };
+  const emptyFallback = <RankingUI {...uiProps} oldRankings={[]} newRankings={[]} />;
+
+  if (!convexAvailable) return emptyFallback;
 
   return (
-    <ConvexRankingContent
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      typeParam={typeParam === "new" ? "new" : "old"}
-      highlightTime={highlightTime}
-    />
+    <QueryErrorBoundary fallback={emptyFallback}>
+      <ConvexRankingContent {...uiProps} />
+    </QueryErrorBoundary>
   );
 }
 

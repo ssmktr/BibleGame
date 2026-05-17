@@ -1,5 +1,5 @@
 "use client";
-import { Suspense, useState } from "react";
+import { Component, Suspense, useState, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useQuery } from "convex/react";
@@ -8,6 +8,17 @@ import { RankingTable } from "@/components/RankingTable";
 import { GAME_LABELS, type GameType } from "@/data/creedPrayer";
 import { useConvexAvailable } from "@/components/ConvexClientProvider";
 import type { RankingEntry } from "@/lib/ranking";
+
+class QueryErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  render() {
+    return this.state.failed ? this.props.fallback : this.props.children;
+  }
+}
 
 interface RankingUIProps {
   activeTab: GameType;
@@ -26,10 +37,7 @@ function RankingUI({ activeTab, setActiveTab, creedRankings, prayerRankings, typ
     <main className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex flex-col">
       <header className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-sm border-b border-white/50">
         <h1 className="font-black text-indigo-900 text-xl">🏆 랭킹</h1>
-        <Link
-          href="/select"
-          className="text-sm text-indigo-600 font-semibold hover:text-indigo-800 transition-colors"
-        >
+        <Link href="/select" className="text-sm text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">
           게임 선택 →
         </Link>
       </header>
@@ -41,9 +49,7 @@ function RankingUI({ activeTab, setActiveTab, creedRankings, prayerRankings, typ
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`flex-1 py-2 rounded-lg font-semibold text-sm transition-colors ${
-                activeTab === tab
-                  ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-gray-600 hover:bg-white/50"
+                activeTab === tab ? "bg-indigo-600 text-white shadow-sm" : "text-gray-600 hover:bg-white/50"
               }`}
             >
               {GAME_LABELS[tab]}
@@ -66,49 +72,28 @@ function RankingUI({ activeTab, setActiveTab, creedRankings, prayerRankings, typ
   );
 }
 
-function ConvexRankingContent({ activeTab, setActiveTab, typeParam, highlightTime }: Omit<RankingUIProps, "creedRankings" | "prayerRankings">) {
+function ConvexRankingContent(props: Omit<RankingUIProps, "creedRankings" | "prayerRankings">) {
   const creedRankings = (useQuery(api.rankings.list, { gameKey: "creed-prayer:creed" }) ?? []) as RankingEntry[];
   const prayerRankings = (useQuery(api.rankings.list, { gameKey: "creed-prayer:prayer" }) ?? []) as RankingEntry[];
-  return (
-    <RankingUI
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      creedRankings={creedRankings}
-      prayerRankings={prayerRankings}
-      typeParam={typeParam}
-      highlightTime={highlightTime}
-    />
-  );
+  return <RankingUI {...props} creedRankings={creedRankings} prayerRankings={prayerRankings} />;
 }
 
 function RankingContent() {
   const searchParams = useSearchParams();
   const typeParam = (searchParams.get("type") ?? "creed") as GameType;
-  const timeParam = searchParams.get("time");
-  const highlightTime = timeParam ? Number(timeParam) : undefined;
+  const highlightTime = searchParams.get("time") ? Number(searchParams.get("time")) : undefined;
   const [activeTab, setActiveTab] = useState<GameType>(typeParam);
   const convexAvailable = useConvexAvailable();
 
-  if (!convexAvailable) {
-    return (
-      <RankingUI
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        creedRankings={[]}
-        prayerRankings={[]}
-        typeParam={typeParam}
-        highlightTime={highlightTime}
-      />
-    );
-  }
+  const uiProps = { activeTab, setActiveTab, typeParam, highlightTime };
+  const emptyFallback = <RankingUI {...uiProps} creedRankings={[]} prayerRankings={[]} />;
+
+  if (!convexAvailable) return emptyFallback;
 
   return (
-    <ConvexRankingContent
-      activeTab={activeTab}
-      setActiveTab={setActiveTab}
-      typeParam={typeParam}
-      highlightTime={highlightTime}
-    />
+    <QueryErrorBoundary fallback={emptyFallback}>
+      <ConvexRankingContent {...uiProps} />
+    </QueryErrorBoundary>
   );
 }
 
