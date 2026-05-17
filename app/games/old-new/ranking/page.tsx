@@ -1,8 +1,9 @@
 "use client";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getRankings, type RankingEntry } from "@/lib/ranking";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { RankingTable } from "@/components/RankingTable";
 
 type TabType = "old" | "new";
@@ -14,13 +15,9 @@ function RankingContent() {
   const highlightTime = timeParam ? Number(timeParam) : undefined;
 
   const [activeTab, setActiveTab] = useState<TabType>(typeParam === "new" ? "new" : "old");
-  const [oldRankings, setOldRankings] = useState<RankingEntry[]>([]);
-  const [newRankings, setNewRankings] = useState<RankingEntry[]>([]);
 
-  useEffect(() => {
-    setOldRankings(getRankings("old-new:old"));
-    setNewRankings(getRankings("old-new:new"));
-  }, []);
+  const oldRankings = useQuery(api.rankings.list, { gameKey: "old-new:old" }) ?? [];
+  const newRankings = useQuery(api.rankings.list, { gameKey: "old-new:new" }) ?? [];
 
   const currentRankings = activeTab === "old" ? oldRankings : newRankings;
   const currentHighlight = typeParam === activeTab ? highlightTime : undefined;

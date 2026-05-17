@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
+import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -20,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="ko" className="h-full">
       <body className={`${notoSansKr.className} min-h-full flex flex-col`}>
-        {children}
+        <ConvexClientProvider>{children}</ConvexClientProvider>
       </body>
     </html>
   );

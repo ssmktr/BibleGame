@@ -1,8 +1,9 @@
 "use client";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { getRankings, type RankingEntry } from "@/lib/ranking";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { RankingTable } from "@/components/RankingTable";
 import { GAME_LABELS, type GameType } from "@/data/creedPrayer";
 
@@ -13,13 +14,9 @@ function RankingContent() {
   const highlightTime = timeParam ? Number(timeParam) : undefined;
 
   const [activeTab, setActiveTab] = useState<GameType>(typeParam);
-  const [creedRankings, setCreedRankings] = useState<RankingEntry[]>([]);
-  const [prayerRankings, setPrayerRankings] = useState<RankingEntry[]>([]);
 
-  useEffect(() => {
-    setCreedRankings(getRankings("creed-prayer:creed"));
-    setPrayerRankings(getRankings("creed-prayer:prayer"));
-  }, []);
+  const creedRankings = useQuery(api.rankings.list, { gameKey: "creed-prayer:creed" }) ?? [];
+  const prayerRankings = useQuery(api.rankings.list, { gameKey: "creed-prayer:prayer" }) ?? [];
 
   const currentRankings = activeTab === "creed" ? creedRankings : prayerRankings;
   const currentHighlight = activeTab === typeParam ? highlightTime : undefined;

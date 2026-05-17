@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import {
   DndContext,
   closestCenter,
@@ -16,7 +18,6 @@ import {
   arraySwap,
 } from "@dnd-kit/sortable";
 import { OLD_TESTAMENT_BOOKS, NEW_TESTAMENT_BOOKS } from "@/data/bibleBooks";
-import { addRanking } from "@/lib/ranking";
 import { useTimer } from "@/lib/useTimer";
 import { BookCard } from "@/components/BookCard";
 import type { CardStatus } from "@/components/SentenceCard";
@@ -51,6 +52,7 @@ const LABEL: Record<"old" | "new", string> = {
 
 export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   const router = useRouter();
+  const addRanking = useMutation(api.rankings.add);
   const books = type === "new" ? NEW_TESTAMENT_BOOKS : OLD_TESTAMENT_BOOKS;
   const rankingKey = `old-new:${type}`;
 
@@ -107,8 +109,8 @@ export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
     }
   }
 
-  function handleNicknameSubmit(nickname: string) {
-    addRanking(rankingKey, { nickname, timeMs: finalTimeMs });
+  async function handleNicknameSubmit(nickname: string) {
+    await addRanking({ gameKey: rankingKey, nickname, timeMs: finalTimeMs });
     router.push(`/games/old-new/ranking?type=${type}&time=${finalTimeMs}`);
   }
 

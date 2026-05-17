@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import {
   DndContext,
   closestCenter,
@@ -16,7 +18,6 @@ import {
   arraySwap,
 } from "@dnd-kit/sortable";
 import { getSentences, GAME_LABELS, type GameType } from "@/data/creedPrayer";
-import { addRanking } from "@/lib/ranking";
 import { useTimer } from "@/lib/useTimer";
 import { SentenceCard, type CardStatus } from "@/components/SentenceCard";
 import { ExitConfirmDialog } from "@/components/ExitConfirmDialog";
@@ -44,6 +45,7 @@ function shuffleCards(arr: CardItem[]): CardItem[] {
 
 export default function CreedPrayerPlayGame({ gameType }: { gameType: GameType }) {
   const router = useRouter();
+  const addRanking = useMutation(api.rankings.add);
 
   // Eagerly initialized — safe because this component is never SSR'd (ssr: false in parent)
   const [cards, setCards] = useState<CardItem[]>(() => {
@@ -97,8 +99,8 @@ export default function CreedPrayerPlayGame({ gameType }: { gameType: GameType }
     }
   }
 
-  function handleNicknameSubmit(nickname: string) {
-    addRanking(`creed-prayer:${gameType}`, { nickname, timeMs: finalTimeMs });
+  async function handleNicknameSubmit(nickname: string) {
+    await addRanking({ gameKey: `creed-prayer:${gameType}`, nickname, timeMs: finalTimeMs });
     router.push(`/games/creed-prayer/ranking?type=${gameType}&time=${finalTimeMs}`);
   }
 
