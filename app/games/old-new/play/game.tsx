@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useRanking } from "@/lib/rankingContext";
 import {
   DndContext,
   closestCenter,
@@ -52,7 +51,7 @@ const LABEL: Record<"old" | "new", string> = {
 
 export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   const router = useRouter();
-  const addRanking = useMutation(api.rankings.add);
+  const addRanking = useRanking();
   const books = type === "new" ? NEW_TESTAMENT_BOOKS : OLD_TESTAMENT_BOOKS;
   const rankingKey = `old-new:${type}`;
 

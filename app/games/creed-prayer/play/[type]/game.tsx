@@ -1,8 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { useRanking } from "@/lib/rankingContext";
 import {
   DndContext,
   closestCenter,
@@ -45,7 +44,7 @@ function shuffleCards(arr: CardItem[]): CardItem[] {
 
 export default function CreedPrayerPlayGame({ gameType }: { gameType: GameType }) {
   const router = useRouter();
-  const addRanking = useMutation(api.rankings.add);
+  const addRanking = useRanking();
 
   // Eagerly initialized — safe because this component is never SSR'd (ssr: false in parent)
   const [cards, setCards] = useState<CardItem[]>(() => {
