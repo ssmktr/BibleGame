@@ -5,7 +5,7 @@ import { useRanking } from "@/lib/rankingContext";
 import {
   DndContext,
   closestCenter,
-  MouseSensor,
+  PointerSensor,
   TouchSensor,
   useSensor,
   useSensors,
@@ -80,8 +80,8 @@ export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   }, [start, stop]);
 
   const sensors = useSensors(
-    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } })
   );
 
   function handleDragEnd(event: DragEndEvent) {
