@@ -25,14 +25,11 @@ export function SentenceCard({ id, text, index, status }: SentenceCardProps) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
-      className={`flex items-center rounded-xl border-2 select-none transition-colors ${borderColor[status]}`}
+      className={`flex items-center rounded-xl border-2 select-none cursor-grab active:cursor-grabbing touch-none transition-colors ${borderColor[status]}`}
       {...attributes}
+      {...listeners}
     >
-      {/* 드래그 핸들 — 이 영역만 터치 이벤트를 소비 */}
-      <div
-        className="flex items-center gap-2 pl-3 pr-2 self-stretch cursor-grab active:cursor-grabbing touch-none"
-        {...listeners}
-      >
+      <div className="flex items-center gap-2 pl-3 pr-2 self-stretch">
         <span className="text-gray-300 text-base leading-none">⠿</span>
         <span className="shrink-0 w-5 text-center text-sm font-bold text-gray-400">
           {index + 1}

@@ -80,7 +80,7 @@ export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   }, [start, stop]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } })
   );
 

@@ -70,7 +70,7 @@ export default function CreedPrayerPlayGame({ gameType }: { gameType: GameType }
   }, [start, stop]);
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 8 } })
   );
 

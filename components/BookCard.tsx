@@ -24,13 +24,11 @@ export function BookCard({ id, name, abbr, status }: BookCardProps) {
     <div
       ref={setNodeRef}
       style={{ transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 }}
-      className={`flex flex-col h-16 rounded-xl border-2 select-none text-center transition-colors ${borderColor[status]}`}
+      className={`flex flex-col h-16 rounded-xl border-2 select-none text-center cursor-grab active:cursor-grabbing touch-none transition-colors ${borderColor[status]}`}
       {...attributes}
+      {...listeners}
     >
-      <div
-        className="flex items-center justify-center py-0.5 cursor-grab active:cursor-grabbing touch-none"
-        {...listeners}
-      >
+      <div className="flex items-center justify-center py-0.5">
         <span className="text-gray-300 text-xs leading-none">⠿</span>
       </div>
       <div className="flex flex-col items-center justify-center flex-1 gap-0.5 pb-1">
