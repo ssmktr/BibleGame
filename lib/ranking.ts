@@ -6,9 +6,26 @@ export interface RankingEntry {
 
 const MAX_RANKINGS = 30;
 
+// Returns the timestamp (ms) of the start of the current hour
+function currentHourStart(): number {
+  return Math.floor(Date.now() / 3_600_000) * 3_600_000;
+}
+
+// Clears rankings for a key if the hour has turned since last write
+function purgeIfStale(key: string): void {
+  const hourKey = `ranking:${key}:hour`;
+  const stored = localStorage.getItem(hourKey);
+  const current = currentHourStart();
+  if (stored === null || Number(stored) < current) {
+    localStorage.removeItem(`ranking:${key}`);
+    localStorage.setItem(hourKey, String(current));
+  }
+}
+
 export function getRankings(key: string): RankingEntry[] {
   if (typeof window === "undefined") return [];
   try {
+    purgeIfStale(key);
     const data = localStorage.getItem(`ranking:${key}`);
     if (!data) return [];
     return JSON.parse(data) as RankingEntry[];
