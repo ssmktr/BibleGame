@@ -110,7 +110,11 @@ export default function OldNewPlayGame({ type }: { type: "old" | "new" }) {
   }
 
   async function handleNicknameSubmit(nickname: string) {
-    await addRanking({ gameKey: rankingKey, nickname, timeMs: finalTimeMs });
+    try {
+      await addRanking({ gameKey: rankingKey, nickname, timeMs: finalTimeMs });
+    } catch {
+      // Convex not configured — skip ranking
+    }
     router.push(`/games/old-new/ranking?type=${type}&time=${finalTimeMs}`);
   }
 

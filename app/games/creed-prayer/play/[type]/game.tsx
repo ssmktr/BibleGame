@@ -100,7 +100,11 @@ export default function CreedPrayerPlayGame({ gameType }: { gameType: GameType }
   }
 
   async function handleNicknameSubmit(nickname: string) {
-    await addRanking({ gameKey: `creed-prayer:${gameType}`, nickname, timeMs: finalTimeMs });
+    try {
+      await addRanking({ gameKey: `creed-prayer:${gameType}`, nickname, timeMs: finalTimeMs });
+    } catch {
+      // Convex not configured — skip ranking
+    }
     router.push(`/games/creed-prayer/ranking?type=${gameType}&time=${finalTimeMs}`);
   }
 
