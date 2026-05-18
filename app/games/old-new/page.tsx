@@ -25,13 +25,13 @@ export default function OldNewEntryPage() {
 
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Link
-            href="/games/old-new/play?type=old"
+            href="/games/old-new/intro?type=old"
             className="py-4 bg-teal-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-teal-700 active:scale-95 transition-all shadow-md"
           >
             구약 시작 (39권)
           </Link>
           <Link
-            href="/games/old-new/play?type=new"
+            href="/games/old-new/intro?type=new"
             className="py-4 bg-emerald-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-emerald-700 active:scale-95 transition-all shadow-md"
           >
             신약 시작 (27권)

@@ -25,13 +25,13 @@ export default function CreedPrayerEntryPage() {
 
         <div className="flex flex-col gap-3 w-full max-w-xs">
           <Link
-            href="/games/creed-prayer/play/creed"
+            href="/games/creed-prayer/intro/creed"
             className="py-4 bg-blue-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-blue-700 active:scale-95 transition-all shadow-md"
           >
             사도신경 시작
           </Link>
           <Link
-            href="/games/creed-prayer/play/prayer"
+            href="/games/creed-prayer/intro/prayer"
             className="py-4 bg-indigo-600 text-white font-bold text-xl text-center rounded-2xl hover:bg-indigo-700 active:scale-95 transition-all shadow-md"
           >
             주기도문 시작
