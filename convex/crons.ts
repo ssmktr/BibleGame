@@ -3,10 +3,10 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// 매일 자정 KST = UTC 15:00 (전날)
-crons.daily(
-  "reset rankings at midnight KST",
-  { hourUTC: 15, minuteUTC: 0 },
+// 매주 월요일 자정 KST = UTC 기준 일요일 15:00
+crons.weekly(
+  "reset rankings weekly at midnight KST Monday",
+  { dayOfWeek: "sunday", hourUTC: 15, minuteUTC: 0 },
   internal.rankings.resetAll
 );
 
